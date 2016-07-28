@@ -1,6 +1,7 @@
 class PinsController < ApplicationController
-	before_action :find_pin, only: [:show,:edit,:update,:destroy,:upvote]
-
+	before_action :find_pin, only: [:show, :edit, :update, :destroy, :upvote, :downvote]
+	before_action :authenticate_user!, except: [:index, :show]
+	
 	def index
 		@pins = Pin.all.order("created_at DESC")
 	end
@@ -23,6 +24,9 @@ class PinsController < ApplicationController
 	end
 
 	def edit
+		unless current_user == @pin.user
+			redirect_to @pin, alert: "You are not able to edit this Pin"
+		end
 	end
 
 	def update
@@ -46,11 +50,11 @@ class PinsController < ApplicationController
 
 	private
 
-		def pin_params
-			params.require(:pin).permit(:title,:description,:image)
-		end
+	def pin_params
+		params.require(:pin).permit(:title,:description,:image)
+	end
 
-		def find_pin
-			@pin = Pin.find(params[:id])
-		end
+	def find_pin
+		@pin = Pin.find(params[:id])
+	end
 end
